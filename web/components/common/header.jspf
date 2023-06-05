@@ -1,0 +1,125 @@
+<%-- any content can be specified here e.g.: --%>
+<%@page import="config.AppConfig" %>
+<header>
+    <div class="d-flex align-items-center justify-content-between container h-100">
+        <a href="<%=request.getContextPath()+"/"%>"><h3>ULM</h3></a>
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn btn-search-trigger d-flex align-items-center" data-bs-toggle="modal"
+                    data-bs-target="#searchModal" onclick="showSearchModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-search"
+                     viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                </svg>
+            </button>
+            <div class="dropdown">
+                <div class="dropdown-toggle" type="button" id="menu1" data-bs-toggle="dropdown" aria-expanded="false"
+                     style="margin: 0!important">
+                    <img class="rounded-circle" style="width:40px"
+                         src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp">
+                    <span class="caret"></span>
+                </div>
+                <ul class="dropdown-menu  dropdown-menu-end">
+                    <li><a class="dropdown-item"
+                           href="${pageContext.request.contextPath}/auth/update-password">Setting</a></li>
+                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="search-modal" aria-hidden="true">
+        <div class="modal-dialog  modal-dialog-centered search-modal">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form action="${pageContext.request.contextPath}/search" class="search-box centered"
+                          id="search-form">
+                        <div class="search-box__icon">
+                            <button type="submit" class="btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-search" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="search-box__input">
+                            <input type="text" name="q" placeholder="Search by code..." id="search-input"
+                                   class="form-control"/>
+                        </div>
+                        <div class="search-box__dropdown">
+                            <select class="form-select" id="inputGroupSelect01" name="c">
+                                <option value="curriculum">Curriculum</option>
+                                <option value="syllabus">Syllabus</option>
+                            </select>
+                        </div>
+                    </form>
+                    <div class="search-results">
+                        <div class="search-results__item" style="display:none; overflow: auto">
+                            <!--                            <a class="search-results__item-container" href="${pageContext.request.contextPath}/syllabuses/prf192">
+                                <p class="title">PRF192</p>
+                                <span class="badge text-bg-primary">Syllabus</span>
+                            </a>-->
+                        </div>
+                    </div>
+                </div>
+                <script>
+
+                    function showSearchModal() {
+
+                        setTimeout(function () {
+                            $("#search-input").focus();
+                        }, 600);
+                    }
+
+                    function renderSpinner(location) {
+                        location.innerHTML = `
+                                <div class="text-center fluid-center">
+                          <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                          </div>
+                        </div>        
+                                `
+                    }
+
+                    async function handleSearch(e) {
+                        e.preventDefault();
+                        const inputNode = document.querySelector(".search-box__input input");
+                        const categoryNode = document.querySelector(".search-box__dropdown select");
+                        const resultNode = document.querySelector(".search-results");
+                        if (!inputNode || !categoryNode)
+                            return;
+                        const query = inputNode.value.trim();
+                        const category = categoryNode.value;
+                        renderSpinner(resultNode);
+                        try {
+                            const response = await fetch("${pageContext.request.contextPath}/search?q=" + query + "&c=" + category);
+                            const result = await response.json();
+                            if (result && result?.data?.length > 0) {
+                                const htmls = result?.data?.reduce((acc, item) => acc += `
+                                    <div class="search-results__item">
+                                        <a href="${pageContext.request.contextPath}/\${item?.root_slug}/\${item?.slug}">
+                                            <div class="search-results__item-container" >
+                                            <h5 class="title">\${item?.name}</h5>
+                                            <span class="badge text-bg-primary">\${category}</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    `, '');
+                                resultNode.innerHTML = htmls;
+                                resultNode.style.display = 'block';
+                            } else {
+                                resultNode.innerHTML = `   <div class="text-center fluid-center">
+                                Not found
+                        </div>        `;
+                            }
+                        } catch (e) {
+                            resultNode.innerHTML = `   <div class="text-center fluid-center">
+                                Not found
+                        </div>        `;
+                        }
+                    }
+
+                    document.getElementById("search-form").addEventListener("submit", handleSearch);
+                </script>
+            </div>
+        </div>
+    </div>
+</header>

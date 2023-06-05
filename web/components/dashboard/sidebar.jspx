@@ -1,0 +1,17 @@
+<nav class="dashboard-sidebar" id="dashboard-sidebar" style="z-index: 1;">
+    <ul class="nav">
+        <li class="navbar-item">
+            <a class="navbar-item__a"
+               href="${pageContext.servletContext.contextPath}/dashboard/curriculums">Curriculums</a>
+        </li>
+        <li class="navbar-item">
+            <a class="navbar-item__a" href="${pageContext.servletContext.contextPath}/dashboard/syllabus">Syllabus</a>
+        </li>
+        <li class="navbar-item">
+            <a class="navbar-item__a" href="${pageContext.servletContext.contextPath}/dashboard/subjects">Subjects</a>
+        </li>
+        <li class="navbar-item">
+            <a class="navbar-item__a" href="${pageContext.servletContext.contextPath}/dashboard/accounts">Accounts</a>
+        </li>
+    </ul>
+</nav>

@@ -1,0 +1,14 @@
+<header class="dashboard-header" id="dashboard-header">
+    <ul class="nav">
+        <li class="navbar-item">
+            <a class="navbar-item__a"
+               href="${pageContext.servletContext.contextPath}/dashboard/curriculums">Curriculums</a>
+        </li>
+        <li class="navbar-item">
+            <a class="navbar-item__a" href="${pageContext.servletContext.contextPath}/dashboard/syllabus">Syllabus</a>
+        </li>
+        <li class="navbar-item">
+            <a class="navbar-item__a" href="${pageContext.servletContext.contextPath}/dashboard/subjects">Subjects</a>
+        </li>
+    </ul>
+</header>

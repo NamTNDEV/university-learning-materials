@@ -1,0 +1,103 @@
+Flow:
+
+- Create syllabus => SylId
+	Sylid  > objective, material, session, question, assessment 
+
+- create prequitesite
+	
+	change dbo.PreRequisite
+	 	columns.requisiteSubjectID (nvarchar(255)
+
+- Create CLO (with PLO ID & syllabus ID) => Map<Name, ID>
+
+- Create sessions  (Syllabus ID) => IDs with Session No
+	SesID > question 
+
+- Create questions (SesID)
+
+- Create assessments 
+
+- Create material + upload material => url
+
+- when inactive:
+	+ inactive syllabus > question, session, assessment, CLO also inactive
+	+ inactive section > question also inactive
+	
+
+Database:
+	
+- dbo.syllabus + dbo.question + session + assessment + Course_Learning_Ojbective
+	add active column
+
+- dbo.PreRequisite
+	 columns.requisiteSubjectID change to (nvarchar(255)
+ 
+
+
+
+
+public class SyllabusDao {
+    private final Connection connection;
+
+    public SyllabusDao(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void create(Syllabus syllabus, List<Session> sessions, List<Question> questions) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            connection.setAutoCommit(false);
+
+            // Insert syllabus
+            String syllabusSql = "INSERT INTO syllabus (subject_id, credit, description, tasks, scoring_scale, min_score) VALUES (?, ?, ?, ?, ?, ?)";
+            stmt = connection.prepareStatement(syllabusSql);
+            stmt.setString(1, syllabus.getSubjectID());
+            stmt.setInt(2, syllabus.getCredit());
+            stmt.setString(3, syllabus.getDescription());
+            stmt.setString(4, syllabus.getTasks());
+            stmt.setInt(5, syllabus.getScoringScale());
+            stmt.setInt(6, syllabus.getMinScore());
+            stmt.executeUpdate();
+
+            // Get the id of the inserted syllabus
+            ResultSet generatedKeys = stmt.getGeneratedKeys();
+            generatedKeys.next();
+            int syllabusId = generatedKeys.getInt(1);
+
+            // Insert sessions
+            String sessionSql = "INSERT INTO session (id, lo_id, learning_type, student_tasks, topic, materials) VALUES (?, ?, ?, ?, ?, ?)";
+            stmt = connection.prepareStatement(sessionSql);
+            for (Session session : sessions) {
+                stmt.setInt(1, session.getId());
+                stmt.setString(2, session.getLO_ID());
+                stmt.setString(3, session.getLearningType());
+                stmt.setString(4, session.getStudentTasks());
+                stmt.setString(5, session.getTopic());
+                stmt.setString(6, session.getMaterials());
+                stmt.executeUpdate();
+            }
+
+            // Insert questions
+            String questionSql = "INSERT INTO question (id, name, details, session_no) VALUES (?, ?, ?, ?)";
+            stmt = connection.prepareStatement(questionSql);
+            for (Question question : questions) {
+                stmt.setInt(1, question.getId());
+                stmt.setString(2, question.getName());
+                stmt.setString(3, question.getDetails());
+                stmt.setInt(4, question.getSessionNo());
+                stmt.executeUpdate();
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+            connection.setAutoCommit(true);
+        }
+    }
+}
+
